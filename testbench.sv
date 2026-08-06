@@ -1,36 +1,54 @@
 `timescale 1ns/1ps
 
-module tb_traffic_light;
+module tb_sequence_detector;
 
 reg clk = 0;
 reg reset = 1;
+reg in = 0;
 
-wire [2:0] light;
+wire detected;
 
-traffic_light uut(
+sequence_detector uut(
     .clk(clk),
     .reset(reset),
-    .light(light)
+    .in(in),
+    .detected(detected)
 );
 
+// Clock Generation
 always #5 clk = ~clk;
 
+// Test Sequence
 initial begin
 
-    $dumpfile("traffic_light.vcd");
-    $dumpvars(0, tb_traffic_light);
+    $dumpfile("sequence_detector.vcd");
+    $dumpvars(0, tb_sequence_detector);
 
     #10 reset = 0;
 
-    #100;
+    // Input Sequence: 1011001011
+
+    #10 in = 1;
+    #10 in = 0;
+    #10 in = 1;
+    #10 in = 1;   // Detect 1011
+
+    #10 in = 0;
+    #10 in = 0;
+    #10 in = 1;
+    #10 in = 0;
+    #10 in = 1;
+    #10 in = 1;   // Detect again
+
+    #20;
 
     $finish;
 
 end
 
 initial begin
-    $monitor("Time=%0t Reset=%b Light=%b",
-              $time, reset, light);
+    $monitor("Time=%0t Reset=%b In=%b Detected=%b",
+              $time, reset, in, detected);
 end
 
 endmodule

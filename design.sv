@@ -1,41 +1,49 @@
-module traffic_light(
+module sequence_detector(
     input clk,
     input reset,
-    output reg [2:0] light
+    input in,
+    output reg detected
 );
-
-parameter RED    = 3'b100,
-          YELLOW = 3'b010,
-          GREEN  = 3'b001;
-
-reg [1:0] state;
-
+reg [2:0] state;
 always @(posedge clk or posedge reset) begin
     if (reset) begin
-        state <= 2'd0;
-        light <= RED;
+        state <= 0;
+        detected <= 0;
     end
     else begin
+        detected <= 0;
+
         case(state)
 
-            2'd0: begin
-                state <= 2'd1;
-                light <= GREEN;
+            // S0
+            0: begin
+                state <= (in) ? 1 : 0;
             end
 
-            2'd1: begin
-                state <= 2'd2;
-                light <= YELLOW;
+            // S1
+            1: begin
+                state <= (in) ? 1 : 2;
             end
 
-            2'd2: begin
-                state <= 2'd0;
-                light <= RED;
+            // S2
+            2: begin
+                state <= (in) ? 3 : 0;
+            end
+
+            // S3
+            3: begin
+                if(in) begin
+                    detected <= 1;
+                    state <= 1;
+                end
+                else begin
+                    state <= 2;
+                end
             end
 
             default: begin
-                state <= 2'd0;
-                light <= RED;
+                state <= 0;
+                detected <= 0;
             end
 
         endcase
