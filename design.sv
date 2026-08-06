@@ -1,41 +1,22 @@
-module mealy_fsm(
+module moore_fsm(
     input clk,
     input reset,
-    input in,
-    output reg out
+    output reg [1:0] state
 );
-reg state;
+
+parameter S0 = 2'b00,
+          S1 = 2'b01,
+          S2 = 2'b10;
+
 always @(posedge clk or posedge reset) begin
-    if (reset) begin
-        state <= 0;
-        out <= 0;
-    end
+    if (reset)
+        state <= S0;
     else begin
         case(state)
-            0: begin
-                if (in) begin
-                    state <= 1;
-                    out <= 0;
-                end
-                else begin
-                    state <= 0;
-                    out <= 0;
-                end
-            end
-            1: begin
-                if (in) begin
-                    state <= 1;
-                    out <= 1;
-                end
-                else begin
-                    state <= 0;
-                    out <= 0;
-                end
-            end
-            default: begin
-                state <= 0;
-                out <= 0;
-            end
+            S0: state <= S1;
+            S1: state <= S2;
+            S2: state <= S0;
+            default: state <= S0;
         endcase
     end
 end

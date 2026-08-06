@@ -1,31 +1,24 @@
 `timescale 1ns/1ps
-module tb_mealy_fsm;
+module tb_moore_fsm;
 reg clk = 0;
 reg reset = 1;
-reg in = 0;
-wire out;
-mealy_fsm uut(
+wire [1:0] state;
+moore_fsm uut(
     .clk(clk),
     .reset(reset),
-    .in(in),
-    .out(out)
+    .state(state)
 );
 always #5 clk = ~clk;
 initial begin
-    $dumpfile("mealy_fsm.vcd");
-    $dumpvars(0, tb_mealy_fsm);
+    $dumpfile("moore_fsm.vcd");
+    $dumpvars(0, tb_moore_fsm);
+
     #10 reset = 0;
-    #10 in = 1;
-    #10 in = 1;
-    #10 in = 0;
-    #10 in = 1;
-    #10 in = 1;
-    #10 in = 0;
-    #20;
+    #60;
     $finish;
 end
 initial begin
-    $monitor("Time=%0t Reset=%b In=%b Out=%b",
-              $time, reset, in, out);
+    $monitor("Time=%0t Reset=%b State=%b",
+              $time, reset, state);
 end
 endmodule
