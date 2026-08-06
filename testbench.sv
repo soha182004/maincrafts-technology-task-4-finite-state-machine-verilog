@@ -1,20 +1,18 @@
 `timescale 1ns/1ps
 
-module tb_vending_machine;
+module tb_password_lock;
 
 reg clk;
 reg reset;
-reg coin5;
-reg coin10;
+reg key;
 
-wire dispense;
+wire unlock;
 
-vending_machine uut(
+password_lock uut(
     .clk(clk),
     .reset(reset),
-    .coin5(coin5),
-    .coin10(coin10),
-    .dispense(dispense)
+    .key(key),
+    .unlock(unlock)
 );
 
 // Clock
@@ -24,43 +22,37 @@ initial
 begin
     clk = 0;
     reset = 1;
-    coin5 = 0;
-    coin10 = 0;
+    key = 0;
 
     $dumpfile("dump.vcd");
-    $dumpvars(0,tb_vending_machine);
+    $dumpvars(0, tb_password_lock);
 
-    // Reset
     #10 reset = 0;
 
-    // ₹5
-    #10 coin5 = 1;
-    #10 coin5 = 0;
+    // Correct sequence: 1,1,1
+    #10 key = 1;
+    #10 key = 1;
+    #10 key = 1;
 
-    // ₹5 -> Dispense
-    #10 coin5 = 1;
-    #10 coin5 = 0;
+    #10 key = 0;
 
-    // Wait
+    // Try again
+    #20 key = 1;
+    #10 key = 1;
+    #10 key = 1;
+
     #20;
-
-    // ₹10 Direct
-    coin10 = 1;
-    #10 coin10 = 0;
-
-    #40;
 
     $finish;
 end
 
 initial
 begin
-    $monitor("Time=%0t State=%b Coin5=%b Coin10=%b Dispense=%b",
-              $time,
-              uut.state,
-              coin5,
-              coin10,
-              dispense);
+    $monitor("Time=%0t State=%b Key=%b Unlock=%b",
+             $time,
+             uut.state,
+             key,
+             unlock);
 end
 
 endmodule

@@ -1,14 +1,14 @@
-module vending_machine(
+module password_lock(
     input clk,
     input reset,
-    input coin5,
-    input coin10,
-    output reg dispense
+    input key,
+    output reg unlock
 );
 
-parameter S0  = 2'b00;
-parameter S5  = 2'b01;
-parameter S10 = 2'b10;
+parameter S0 = 2'b00;
+parameter S1 = 2'b01;
+parameter S2 = 2'b10;
+parameter S3 = 2'b11;
 
 reg [1:0] state;
 
@@ -17,49 +17,53 @@ begin
     if(reset)
     begin
         state <= S0;
-        dispense <= 0;
+        unlock <= 0;
     end
     else
     begin
-        dispense <= 0;
+        unlock <= 0;
 
         case(state)
 
+            // First correct key
             S0:
             begin
-                if(coin5)
-                    state <= S5;
-
-                else if(coin10)
-                begin
-                    state <= S10;
-                    dispense <= 1;
-                end
+                if(key)
+                    state <= S1;
             end
 
-            S5:
+            // Second correct key
+            S1:
             begin
-                if(coin5)
-                begin
-                    state <= S10;
-                    dispense <= 1;
-                end
-                else if(coin10)
-                begin
-                    state <= S10;
-                    dispense <= 1;
-                end
+                if(key)
+                    state <= S2;
+                else
+                    state <= S0;
             end
 
-            S10:
+            // Third correct key
+            S2:
+            begin
+                if(key)
+                begin
+                    state <= S3;
+                    unlock <= 1;
+                end
+                else
+                    state <= S0;
+            end
+
+            // Door unlocked
+            S3:
             begin
                 state <= S0;
+                unlock <= 0;
             end
 
             default:
             begin
                 state <= S0;
-                dispense <= 0;
+                unlock <= 0;
             end
 
         endcase
