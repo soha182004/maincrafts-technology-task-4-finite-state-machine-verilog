@@ -1,24 +1,36 @@
 `timescale 1ns/1ps
-module tb_moore_fsm;
+
+module tb_traffic_light;
+
 reg clk = 0;
 reg reset = 1;
-wire [1:0] state;
-moore_fsm uut(
+
+wire [2:0] light;
+
+traffic_light uut(
     .clk(clk),
     .reset(reset),
-    .state(state)
+    .light(light)
 );
+
 always #5 clk = ~clk;
+
 initial begin
-    $dumpfile("moore_fsm.vcd");
-    $dumpvars(0, tb_moore_fsm);
+
+    $dumpfile("traffic_light.vcd");
+    $dumpvars(0, tb_traffic_light);
 
     #10 reset = 0;
-    #60;
+
+    #100;
+
     $finish;
+
 end
+
 initial begin
-    $monitor("Time=%0t Reset=%b State=%b",
-              $time, reset, state);
+    $monitor("Time=%0t Reset=%b Light=%b",
+              $time, reset, light);
 end
+
 endmodule

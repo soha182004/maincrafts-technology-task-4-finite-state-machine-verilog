@@ -1,23 +1,45 @@
-module moore_fsm(
+module traffic_light(
     input clk,
     input reset,
-    output reg [1:0] state
+    output reg [2:0] light
 );
 
-parameter S0 = 2'b00,
-          S1 = 2'b01,
-          S2 = 2'b10;
+parameter RED    = 3'b100,
+          YELLOW = 3'b010,
+          GREEN  = 3'b001;
+
+reg [1:0] state;
 
 always @(posedge clk or posedge reset) begin
-    if (reset)
-        state <= S0;
+    if (reset) begin
+        state <= 2'd0;
+        light <= RED;
+    end
     else begin
         case(state)
-            S0: state <= S1;
-            S1: state <= S2;
-            S2: state <= S0;
-            default: state <= S0;
+
+            2'd0: begin
+                state <= 2'd1;
+                light <= GREEN;
+            end
+
+            2'd1: begin
+                state <= 2'd2;
+                light <= YELLOW;
+            end
+
+            2'd2: begin
+                state <= 2'd0;
+                light <= RED;
+            end
+
+            default: begin
+                state <= 2'd0;
+                light <= RED;
+            end
+
         endcase
     end
 end
+
 endmodule
