@@ -1,49 +1,65 @@
-module sequence_detector(
+module vending_machine(
     input clk,
     input reset,
-    input in,
-    output reg detected
+    input coin5,
+    input coin10,
+    output reg dispense
 );
-reg [2:0] state;
-always @(posedge clk or posedge reset) begin
-    if (reset) begin
-        state <= 0;
-        detected <= 0;
+
+parameter S0  = 2'b00;
+parameter S5  = 2'b01;
+parameter S10 = 2'b10;
+
+reg [1:0] state;
+
+always @(posedge clk or posedge reset)
+begin
+    if(reset)
+    begin
+        state <= S0;
+        dispense <= 0;
     end
-    else begin
-        detected <= 0;
+    else
+    begin
+        dispense <= 0;
 
         case(state)
 
-            // S0
-            0: begin
-                state <= (in) ? 1 : 0;
-            end
+            S0:
+            begin
+                if(coin5)
+                    state <= S5;
 
-            // S1
-            1: begin
-                state <= (in) ? 1 : 2;
-            end
-
-            // S2
-            2: begin
-                state <= (in) ? 3 : 0;
-            end
-
-            // S3
-            3: begin
-                if(in) begin
-                    detected <= 1;
-                    state <= 1;
-                end
-                else begin
-                    state <= 2;
+                else if(coin10)
+                begin
+                    state <= S10;
+                    dispense <= 1;
                 end
             end
 
-            default: begin
-                state <= 0;
-                detected <= 0;
+            S5:
+            begin
+                if(coin5)
+                begin
+                    state <= S10;
+                    dispense <= 1;
+                end
+                else if(coin10)
+                begin
+                    state <= S10;
+                    dispense <= 1;
+                end
+            end
+
+            S10:
+            begin
+                state <= S0;
+            end
+
+            default:
+            begin
+                state <= S0;
+                dispense <= 0;
             end
 
         endcase

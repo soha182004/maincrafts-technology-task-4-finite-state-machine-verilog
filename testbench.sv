@@ -1,54 +1,66 @@
 `timescale 1ns/1ps
 
-module tb_sequence_detector;
+module tb_vending_machine;
 
-reg clk = 0;
-reg reset = 1;
-reg in = 0;
+reg clk;
+reg reset;
+reg coin5;
+reg coin10;
 
-wire detected;
+wire dispense;
 
-sequence_detector uut(
+vending_machine uut(
     .clk(clk),
     .reset(reset),
-    .in(in),
-    .detected(detected)
+    .coin5(coin5),
+    .coin10(coin10),
+    .dispense(dispense)
 );
 
-// Clock Generation
+// Clock
 always #5 clk = ~clk;
 
-// Test Sequence
-initial begin
+initial
+begin
+    clk = 0;
+    reset = 1;
+    coin5 = 0;
+    coin10 = 0;
 
-    $dumpfile("sequence_detector.vcd");
-    $dumpvars(0, tb_sequence_detector);
+    $dumpfile("dump.vcd");
+    $dumpvars(0,tb_vending_machine);
 
+    // Reset
     #10 reset = 0;
 
-    // Input Sequence: 1011001011
+    // ₹5
+    #10 coin5 = 1;
+    #10 coin5 = 0;
 
-    #10 in = 1;
-    #10 in = 0;
-    #10 in = 1;
-    #10 in = 1;   // Detect 1011
+    // ₹5 -> Dispense
+    #10 coin5 = 1;
+    #10 coin5 = 0;
 
-    #10 in = 0;
-    #10 in = 0;
-    #10 in = 1;
-    #10 in = 0;
-    #10 in = 1;
-    #10 in = 1;   // Detect again
-
+    // Wait
     #20;
 
-    $finish;
+    // ₹10 Direct
+    coin10 = 1;
+    #10 coin10 = 0;
 
+    #40;
+
+    $finish;
 end
 
-initial begin
-    $monitor("Time=%0t Reset=%b In=%b Detected=%b",
-              $time, reset, in, detected);
+initial
+begin
+    $monitor("Time=%0t State=%b Coin5=%b Coin10=%b Dispense=%b",
+              $time,
+              uut.state,
+              coin5,
+              coin10,
+              dispense);
 end
 
 endmodule
